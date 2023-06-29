@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Work Order Notes Generator</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f2f2f2;
+            margin: 0;
+            padding: 20px;
+            text-align: center;
+        }
+
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            background-color: #fff;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        h1 {
+            color: #333;
+            margin-top: 0;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 5px;
+            color: #555;
+            font-weight: bold;
+            text-align: left;
+        }
+
+        input[type="text"],
+        select {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 15px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            font-size: 16px;
+            outline: none;
+        }
+
+        button {
+            display: inline-block;
+            padding: 10px 20px;
+            background-color: #4CAF50;
+            color: #fff;
+            border: none;
+            border-radius: 4px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        button:hover {
+            background-color: #45a049;
+        }
+
+        #generated_note {
+            margin-top: 20px;
+            padding: 15px;
+            background-color: #f9f9f9;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            text-align: left;
+        }
+
+        .info {
+            color: #777;
+            font-size: 12px;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Work Order Notes </h1>
+
+        <label for="script_type">Select the Script Type:</label>
+        <select id="script_type">
+            <option value="">Select</option>
+            <option value="Manual Planning">Manual Planning</option>
+            <option value="2 Person Jobs/Special Condition Planning">2 Person Jobs/Special Condition Planning</option>
+            <option value="Remove WON from MT/MTT timeline">Remove WON from MT/MTT timeline</option>
+            <option value="MOPS – When actioned from tile/call or ticket from MT/MTT">MOPS – When actioned from tile/call or ticket from MT/MTT</option>
+            <option value="MOPS – When actioned via Zendesk ticket request from MM">MOPS – When actioned via Zendesk ticket request from MM</option>
+            <option value="WONs moved to site visit required or WON actioned from tiles (Rejected/Non Parts paused tiles)">WONs moved to site visit required or WON actioned from tiles (Rejected/Non Parts paused tiles)</option>
+        </select>
+
+        <label for="person1_name">Person 1 Name:</label>
+        <input type="text" id="person1_name">
+
+        <label for="person2_name">Person 2 Name:</label>
+        <input type="text" id="person2_name">
+
+        <label for="query_channel">Select the Query Channel:</label>
+        <select id="query_channel">
+            <option value="">Select</option>
+            <option value="Tiles">Tiles</option>
+            <option value="Call">Call</option>
+            <option value="Zendesk Field">Zendesk Field</option>
+            <option value="Zendesk Triage">Zendesk Triage</option>
+            <option value="PFS Mailbox">PFS Mailbox</option>
+        </select>
+
+        <label for="requestor_name">Requestor Name:</label>
+        <input type="text" id="requestor_name">
+
+        <label for="zendesk_ticket">Zendesk Ticket Number:</label>
+        <input type="text" id="zendesk_ticket">
+
+        <button id="generate_button">Generate Note</button>
+
+        <div id="generated_note"></div>
+
+        <button id="copy_button">Copy Note</button>
+        <button id="clear_button">Clear Fields</button>
+
+        <p class="info">Developed by: Sonu Kumar</p>
+    </div>
+
+    <script>
+        // Get DOM elements
+        const scriptType = document.getElementById("script_type");
+        const person1Name = document.getElementById("person1_name");
+        const person2Name = document.getElementById("person2_name");
+        const queryChannel = document.getElementById("query_channel");
+        const requestorName = document.getElementById("requestor_name");
+        const zendeskTicket = document.getElementById("zendesk_ticket");
+        const generateButton = document.getElementById("generate_button");
+        const generatedNote = document.getElementById("generated_note");
+        const copyButton = document.getElementById("copy_button");
+        const clearButton = document.getElementById("clear_button");
+
+        // Generate the note
+        generateButton.addEventListener("click", () => {
+            const selectedScriptType = scriptType.value;
+
+            if (selectedScriptType === "Manual Planning") {
+                const note = `WON planned as per request received on ${getCurrentDate()};
+                Query Type – Manual Allocation;
+                Query Channel – ${getQueryChannel()};
+                Requestor Name – ${getRequestorName()}
+                ${getZendeskTicketNumber()}`;
+
+                generatedNote.innerText = note;
+            } else if (selectedScriptType === "2 Person Jobs/Special Condition Planning") {
+                const note = `Special condition job planned for 2 person visit with ${getPerson1Name()} & ${getPerson2Name()};
+                Query Type – Special condition requirement planned;
+                Query Channel – ${getQueryChannel()};
+                Requestor Name – ${getRequestorName()}
+                ${getZendeskTicketNumber()}`;
+
+                generatedNote.innerText = note;
+            } else if (selectedScriptType === "Remove WON from MT/MTT timeline") {
+                const note = `WON removed from timeline as requested on ${getCurrentDate()};
+                Query Type – Remove WONs from timeline;
+                Query Channel – ${getQueryChannel()};
+                Requestor Name – ${getRequestorName()}
+                ${getZendeskTicketNumber()}`;
+
+                generatedNote.innerText = note;
+            } else if (selectedScriptType === "MOPS – When actioned from tile/call or ticket from MT/MTT") {
+                const note = `Email request shared for 2nd line support approval to MM/LMM.
+                Query Type – MOPS;
+                Query Channel – ${getQueryChannel()};
+                Requestor Name – ${getRequestorName()};
+                ${getZendeskTicketNumber()}`;
+
+                generatedNote.innerText = note;
+            } else if (selectedScriptType === "MOPS – When actioned via Zendesk ticket request from MM") {
+                const note = `WON reassigned as per request on ${getCurrentDate()}.
+                Query Type – MOPS;
+                Query Channel – ${getQueryChannel()};
+                Requestor Name – ${getRequestorName()}
+                ${getZendeskTicketNumber()}`;
+
+                generatedNote.innerText = note;
+            } else if (selectedScriptType === "WONs moved to site visit required or WON actioned from tiles (Rejected/Non Parts paused tiles)") {
+                const note = `WON reviewed and moved to action channel for optimization based on priorty ${getCurrentDate()};
+                Query Type – Parts/Rejected action/Non Parts Paused action;
+                Query Channel – ${getQueryChannel()};
+                Requestor Name – ${getRequestorName()};
+                ${getZendeskTicketNumber()}`;
+
+                generatedNote.innerText = note;
+            } else {
+                generatedNote.innerText = "Please select a script type.";
+            }
+        });
+
+        // Copy the note to clipboard
+        copyButton.addEventListener("click", () => {
+            const note = generatedNote.innerText;
+
+            if (note) {
+                navigator.clipboard.writeText(note)
+                    .then(() => {
+                        alert("Note copied to clipboard!");
+                    })
+                    .catch((error) => {
+                        console.error("Failed to copy note:", error);
+                    });
+            } else {
+                alert("No note generated to copy!");
+            }
+        });
+
+        // Clear all fields
+        clearButton.addEventListener("click", () => {
+            scriptType.value = "";
+            person1Name.value = "";
+            person2Name.value = "";
+            queryChannel.value = "";
+            requestorName.value = "";
+            zendeskTicket.value = "";
+            generatedNote.innerText = "";
+        });
+
+        // Helper functions to get values
+        function getPerson1Name() {
+            return person1Name.value.trim() || "Person 1";
+        }
+
+        function getPerson2Name() {
+            return person2Name.value.trim() || "Person 2";
+        }
+
+        function getQueryChannel() {
+            return queryChannel.value.trim() || "Query Channel";
+        }
+
+        function getRequestorName() {
+            return requestorName.value.trim() || "Requestor Name";
+        }
+
+        function getZendeskTicketNumber() {
+            return zendeskTicket.value.trim() ? `Zendesk Ticket - ${zendeskTicket.value.trim()}` : "";
+        }
+
+        function getCurrentDate() {
+            const date = new Date();
+            const options = { year: "numeric", month: "long", day: "numeric" };
+            return date.toLocaleDateString(undefined, options);
+        }
+    </script>
+</body>
+</html>
